@@ -1,0 +1,163 @@
+<ejs-treegrid #treegrid [dataSource]='data'
+              [enableVirtualization]=true
+              height=500
+              childMapping='Crew'
+              [treeColumnIndex]='1'
+              [contextMenuItems]="contextMenuItems"
+              [allowFiltering]='allowFiltering'
+              [allowResizing]='true'
+              (beforeItemRender)='itemRender($event)'
+              (contextMenuOpen)="contextMenuOpen($event)"
+              (contextMenuClick)="contextMenuClick($event)"
+              (dialogOpen)="onOpenDialog($event)">
+    <e-columns id="columns">
+        <e-column field='TaskID'
+                  isPrimaryKey='true'
+                  [headerText]='taskIDheaderText'
+                  width='120'
+                  [minWidth]='50'
+                  textAlign="Center"
+                  [defaultValue]="'SSSSSSSSSSSSSSSSS'"
+                  editType="stringedit"
+                  id='target'>
+        </e-column>
+        <e-column field='FIELD1'
+                  [headerText]='column2headerText'
+                  width='120'
+                  [minWidth]='50'
+                  [defaultValue]="true"
+                  showColumnMenu=true
+                  editType='dropdownedit'>
+        </e-column>
+        <e-column field='FIELD2'
+                  [headerText]='column3headerText'
+                  width='100'
+                  [minWidth]='50'
+                  [defaultValue]="true"
+                  showColumnMenu=true
+                  [editType]='editTypeFIELD2'>
+        </e-column>
+        <e-column field='FIELD3'
+                  [headerText]='column4headerText'
+                  width='120'
+                  [minWidth]='50'
+                  [defaultValue]="true"
+                  showColumnMenu=true
+                  [editType]='editTypeFIELD3'>
+        </e-column>
+        <e-column field='FIELD4'
+                  [headerText]='column5headerText'
+                  width='120'
+                  [minWidth]='50'
+                  [defaultValue]="true"
+                  textAlign='Right'
+                  showColumnMenu=true
+                  [editType]='editTypeFIELD4'>
+        </e-column>
+    </e-columns>
+</ejs-treegrid>
+
+    <div #container class='root-container'>
+        <ejs-dialog id='dialog' #ejDialog
+                    (close)='closeDialog($event)'
+                    (beforeClose)='checkInputs($event)'
+                    [header]='dialogHeader'
+                    [content]='editOrAddTemplate'
+                    [visible]='false'
+                    [showCloseIcon]='false'
+                    [target]='targetElement'
+                    [buttons]='buttons'
+                    [position]="{ X: 'center', Y: 'top' }"
+                    width='350px'>
+        </ejs-dialog>
+    </div>
+
+    <ng-template #dialogHeader>
+        <div>{{ dialogHeaderText }}</div>
+    </ng-template>
+
+    <ng-template #editOrAddTemplate>
+        <div class="form-row" [formGroup]="addOrEditForm">
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input formControlName="columnName" id="columnName" name="columnName" type="text">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnName">header name  </label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper" id="dataType">
+                    <label class="e-label-top" for="dataType">data type  </label>
+                    <select formControlName="columnDataType" id="columnDataType" name="columnDataType">
+                        <option value="string">string</option>
+                        <option value="boolean">boolean</option>
+                        <option value="number">number</option>
+                        <option value="date">date</option>
+                        <option value="datetime">datetime</option>
+                    </select>
+                    <span class="e-float-line"></span>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input formControlName="columnDefaultValue" id="columnDefaultValue" name="columnDefaultValue" type="text">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnDefaultValue">default value</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input formControlName="columnMinWidth" id="columnMinWidth" name="columnMinWidth" type="number">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnMinWidth">Min Width</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input formControlName="columnFontSize" id="columnFontSize" name="columnFontSize" type="number">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnFontSize">Font Size</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input  ejs-colorpicker formControlName="columnFontColor" id="columnFontColor" name="columnFontColor" type="color">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnFontColor">Font Color</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input ejs-colorpicker formControlName="columnBackgroundColor" id="columnBackgroundColor" name="columnBackgroundColor" type='color' />
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnBackgroundColor">Background Color</label>
+                </div>
+            </div>
+            <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <label class="e-label-top" for="columnTextAligh">Text Aligh  </label>
+                    <select formControlName="columnTextAligh" id="columnTextAligh" name="columnTextAligh" >
+                        <option value="Left">Left</option>
+                        <option value="Center">Center</option>
+                        <option value="Right">Right</option>
+                    </select>
+                    <span class="e-float-line"></span>
+                </div>
+            </div>
+            <!-- <div class="form-group col-md-6" *ngIf="true">
+                <div class="e-float-input e-control-wrapper">
+                    <input formControlName="columnTextWrap" id="columnTextWrap" name="columnTextWrap" type="text">
+                    <span class="e-float-line"></span>
+                    <label class="e-float-text e-label-top" for="columnTextWrap">Text Wrap</label>
+                </div>
+            </div> -->
+        </div>
+    </ng-template>
+
+    <ng-template #newColumn>
+        <e-column field=''
+                  width='50'
+                  editType='stringedit'>
+        </e-column>
+    </ng-template>
+    
