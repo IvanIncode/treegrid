@@ -1,6 +1,6 @@
 <ejs-treegrid #treegrid [dataSource]='data'
               [enableVirtualization]=true
-              height=500
+              height='100%'
               childMapping='Crew'
               [treeColumnIndex]='1'
               [contextMenuItems]="contextMenuItems"
@@ -17,7 +17,7 @@
                   width='120'
                   [minWidth]='50'
                   textAlign="Center"
-                  [defaultValue]="'SSSSSSSSSSSSSSSSS'"
+                  [defaultValue]="'Default Value'"
                   editType="stringedit"
                   id='target'>
         </e-column>
