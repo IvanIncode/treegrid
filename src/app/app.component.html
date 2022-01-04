@@ -9,6 +9,7 @@
               (beforeItemRender)='itemRender($event)'
               (contextMenuOpen)="contextMenuOpen($event)"
               (contextMenuClick)="contextMenuClick($event)"
+              [selectionSettings]='selectionOptions'
               (dialogOpen)="onOpenDialog($event)">
     <e-columns id="columns">
         <e-column field='TaskID'
@@ -67,6 +68,17 @@
                     [showCloseIcon]='false'
                     [target]='targetElement'
                     [buttons]='buttons'
+                    [position]="{ X: 'center', Y: 'top' }"
+                    width='350px'>
+        </ejs-dialog>
+        <ejs-dialog id='dialog' #ejDialogDelete
+                    (close)='closeDeleteDialog($event)'
+                    header='Deleting confirmation'
+                    [content]='confirmDeletion'
+                    [visible]='false'
+                    [showCloseIcon]='false'
+                    [target]='targetElement'
+                    [buttons]='deletionButtons'
                     [position]="{ X: 'center', Y: 'top' }"
                     width='350px'>
         </ejs-dialog>
@@ -154,10 +166,6 @@
         </div>
     </ng-template>
 
-    <ng-template #newColumn>
-        <e-column field=''
-                  width='50'
-                  editType='stringedit'>
-        </e-column>
+    <ng-template #confirmDeletion>
+        <h3>Are you sure? This action can't be canceled</h3>
     </ng-template>
-    
