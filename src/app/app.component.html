@@ -4,11 +4,9 @@
               childMapping='Crew'
               [treeColumnIndex]='1'
               [contextMenuItems]="contextMenuItems"
-              [allowFiltering]='allowFiltering'
+              [allowFiltering]='isFilteringAllowed'
               [allowResizing]='true'
-              [frozenRows]='0'
-              [frozenColumns]='0'
-              (beforeItemRender)='itemRender($event)'
+              [editSettings]="editOptions"
               (contextMenuOpen)="contextMenuOpen($event)"
               (contextMenuClick)="contextMenuClick($event)"
               [selectionSettings]='selectionOptions'
@@ -73,7 +71,7 @@
                     [position]="{ X: 'center', Y: 'top' }"
                     width='350px'>
         </ejs-dialog>
-        <ejs-dialog id='dialog' #ejDialogDelete
+        <ejs-dialog id='delitDialog' #ejDialogDelete
                     (close)='closeDeleteDialog($event)'
                     header='Deleting confirmation'
                     [content]='confirmDeletion'
@@ -83,6 +81,17 @@
                     [buttons]='deletionButtons'
                     [position]="{ X: 'center', Y: 'top' }"
                     width='350px'>
+        </ejs-dialog>
+        <ejs-dialog id='actionDialog' #ejDialogAction
+                    (close)='closeChosenDialog($event)'
+                    header='Showed or hidden columns'
+                    [content]='whatNeedToDoWithChoosedColumn'
+                    [visible]='false'
+                    [showCloseIcon]='false'
+                    [target]='targetElement'
+                    [buttons]='actionButtons'
+                    [position]="{ X: 'center', Y: 'top' }"
+                    width='450px'>
         </ejs-dialog>
     </div>
 
@@ -103,11 +112,12 @@
                 <div class="e-float-input e-control-wrapper" id="dataType">
                     <label class="e-label-top" for="dataType">data type  </label>
                     <select formControlName="columnDataType" id="columnDataType" name="columnDataType">
-                        <option value="string">string</option>
-                        <option value="boolean">boolean</option>
-                        <option value="number">number</option>
-                        <option value="date">date</option>
-                        <option value="datetime">datetime</option>
+                        <option value="stringedit">string</option>
+                        <option value="numericedit">number</option>
+                        <option value="dropdownedit">dropdown</option>
+                        <option value="checkboxedit">checkbox</option>
+                        <option value="datapickeredit">datapicker</option>
+                        <option value="datatimepickeredit">datatimepicker</option>
                     </select>
                     <span class="e-float-line"></span>
                 </div>
@@ -170,4 +180,17 @@
 
     <ng-template #confirmDeletion>
         <h3>Are you sure? This action can't be canceled</h3>
+    </ng-template>
+
+    <ng-template #whatNeedToDoWithChoosedColumn>
+        <ul>
+            <li *ngFor="let column of visibleColumns" style="list-style-type: none;">
+                <input type="checkbox" name="column.field" id="column.field" [checked]="column.visible" (click)="returnIsColumnVisible(column)">
+                <label for="column.id">{{ column.headerText }}</label>
+            </li>
+        </ul>
+    </ng-template>
+
+    <ng-template #newColumn>
+        <h1>qqqqqqqq</h1>
     </ng-template>

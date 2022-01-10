@@ -5,3 +5,13 @@
 li.e-menu-item.e-focused:hover {
   background-color: rgb(209, 206, 206);
 }
+
+.e-treegrid .e-rowcell.choosed-column,
+.e-treegrid .e-headercell.choosed-column {
+  background-color: rgb(219, 219, 219);
+}
+
+.e-treegrid .e-rowcell.column-no-choosed,
+.e-treegrid .e-headercell.column-no-choosed {
+  background-color: transparent;
+}

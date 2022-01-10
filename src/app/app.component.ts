@@ -1,7 +1,7 @@
-import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
+import { ContextMenuComponent, ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
 import { Component, ElementRef, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { dataSource, virtualData, textWrapData } from './datasource';
-import { VirtualScrollService, TreeGridComponent, ColumnMenuService, EditSettingsModel, ResizeService, EditService, ContextMenuService, Column, SelectionSettingsModel } from '@syncfusion/ej2-angular-treegrid';
+import { dataSource, virtualData, textWrapData, templateData } from './datasource';
+import { VirtualScrollService, TreeGridComponent, ColumnMenuService, EditSettingsModel, ResizeService, EditService, ContextMenuService, Column, SelectionSettingsModel, ContextMenuItem } from '@syncfusion/ej2-angular-treegrid';
 import { DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { EmitType } from '@syncfusion/ej2-base';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -21,14 +21,17 @@ export class AppComponent implements OnInit {
   @ViewChild('treegrid') treegrid!: TreeGridComponent;
   @ViewChild('ejDialog') ejDialog!: DialogComponent;
   @ViewChild('ejDialogDelete') ejDialogDelete!: DialogComponent;
+  @ViewChild('ejDialogAction') ejDialogAction!: DialogComponent;
   @ViewChild('container', { read: ElementRef, static: true }) container!: ElementRef;
   @ViewChild('newColumn') columnTemplate: Column;
   public data!: Object[];
   public contextMenuItems!: MenuItemModel[];
+  public contextMenuRowsItems!: MenuItemModel[];
   public editing!: EditSettingsModel;
   public editparams!: Object;
   public targetElement!: HTMLElement;
   public isDeleteConfirm: boolean;
+  public isColumnVisible: boolean;
   public hideDialog: EmitType<object> = () => {
     this.isConfirm = true;
     this.ejDialog.hide();
@@ -36,6 +39,10 @@ export class AppComponent implements OnInit {
   public hideDeleteDialog: EmitType<object> = () => {
     this.isDeleteConfirm = true;
     this.ejDialogDelete.hide();
+  }
+  public hideActionDialog: EmitType<object> = () => {
+    this.isColumnVisible = true;
+    this.ejDialogAction.hide();
   }
   public cancelDeleteDialog: EmitType<object> = () => {
     this.isDeleteConfirm = false;
@@ -45,6 +52,11 @@ export class AppComponent implements OnInit {
   public cancelDialog: EmitType<object> = () => {
     this.isConfirm = false;
     this.ejDialog.hide();
+  }
+
+  public cancelActionDialog: EmitType<object> = () => {
+    this.isColumnVisible = false;
+    this.ejDialogAction.hide();
   }
 
   public buttons: Object = [
@@ -79,6 +91,22 @@ export class AppComponent implements OnInit {
     }
   ];
 
+  public actionButtons: Object = [
+    {
+      'click': this.hideActionDialog.bind(this),
+        buttonModel:{
+        content: 'CONFIRM',
+        isPrimary: true,
+      }
+    },
+    {
+      'click': this.cancelActionDialog.bind(this),
+      buttonModel: {
+        content: 'CANCEL',
+      }
+    }
+  ];
+
   public items: ItemModel[] = [
     { text: 'string' },
     { text: 'boolean' },
@@ -105,7 +133,6 @@ export class AppComponent implements OnInit {
   public editTypeFIELD3: string = 'stringedit';
   public editTypeFIELD4: string = 'stringedit';
   public choosedDataType: string = 'string';
-  public allowFiltering: boolean = true;
   public taskIDheaderText: string = 'Column 1';
   public column2headerText: string = 'Column 2';
   public column3headerText: string = 'Column 3';
@@ -116,6 +143,10 @@ export class AppComponent implements OnInit {
   public isHeaderClick: boolean;
   public selectionOptions: SelectionSettingsModel = {type: 'Multiple'};
   public selectedColumn: Column | null;
+  public visibleColumns: Column[] = [];
+  public isFilteringAllowed: boolean;
+
+  public editOptions: EditSettingsModel = {allowAdding: true, allowEditing: true, allowDeleting: true, mode: 'Row'};
 
 
   constructor(private fb: FormBuilder){
@@ -131,6 +162,7 @@ export class AppComponent implements OnInit {
       columnTextWrap: [''],
     })
   }
+
   ngOnInit(): void {
     this.initilaizeTarget();
     dataSource();
@@ -139,10 +171,16 @@ export class AppComponent implements OnInit {
       { text: 'Edit Column', id: 'EditCol'},
       { text: 'New Column', id: 'NewCol' },
       { text: 'Delete Column', id: 'DeleteCol' },
-      //{ text: 'Choose Colomn', id: 'ChooseCol' },
+      { text: 'Colomn visibility', id: 'ChooseCol' },
       { text: 'Freez Column', id: 'FreezCol' },
-      { text: 'Filter Column',  id: 'FilterCol' },
+      { text: 'Column filtering',  id: 'FilterCol' },
       { text: 'MultiSort',  id: 'MultiSort' }
+    ];
+    this.contextMenuRowsItems = [
+      { text: 'Add next', id: 'AddNext'},
+      { text: 'Add child', id: 'AddChild' },
+      { text: 'Delete row', id: 'DelRow' },
+      { text: 'Edit row', id: 'EditRow' },
     ];
     this.editing = { allowDeleting: true, showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, mode: 'Cell' };
     this.editparams = {params: { format: 'n' }};
@@ -154,18 +192,58 @@ export class AppComponent implements OnInit {
   }
 
   contextMenuOpen(arg?: any) {
+    console.log(arg.rowInfo.target)
     let isHeaderClick = false;
     document.querySelectorAll('div.e-headercelldiv').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     document.querySelectorAll('span.e-headertext').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     if(!isHeaderClick) {
-      arg.cancel = true;
+      this.treegrid.contextMenuItems = this.contextMenuRowsItems;
+      //arg.cancel = true;
     } else {
-      arg.cancel = false;
+      this.treegrid.contextMenuItems = this.contextMenuItems;
+      //arg.cancel = false;
     };
+
     this.clearAllInputs();
     if(!arg.parentItem) {
       this.columnNameForManipulations = arg.column.field;
     }
+  }
+
+  actionsWithRows(row: any) {
+    console.log(row)
+    let whoIsThis = '';
+    if(row.rowData.Crew && row.rowData.childRecords) {
+      whoIsThis = 'parent';
+      console.log('its parent')
+    } else {
+      whoIsThis = 'children';
+      console.log('its children')
+    }
+    switch(this.actionToDo) {
+      case 'AddNext':
+        this.addRowLikeNext(row);
+        break;
+      case 'AddChild':
+        this.addRowLikeChild(row);
+        break;
+      case 'DelRow':
+        console.log('delete row');
+        //this.treegrid.deleteRow();
+        this.treegrid.refresh();
+        break;
+      case 'EditRow':
+        console.log('edit row');
+        break;
+    }
+  }
+
+  addRowLikeNext(row: any) {
+
+  }
+
+  addRowLikeChild(row: any) {
+
   }
 
   getColumn(columnName: string) {
@@ -173,20 +251,25 @@ export class AppComponent implements OnInit {
   }
 
   contextMenuClick(arg?: any) {
+    const column = this.getColumn(this.columnNameForManipulations);
     if(arg) {
       this.actionToDo = arg.item.properties.id;
     }
-    if(this.actionToDo === 'EditCol' || this.actionToDo === 'NewCol' || this.actionToDo === 'DeleteCol') {
+    if(this.actionToDo === 'EditCol'
+          || this.actionToDo === 'NewCol'
+          || this.actionToDo === 'DeleteCol'
+          || this.actionToDo === 'ChooseCol') {
       this.onOpenDialog(arg)
-    } else {
-      //console.log(this.actionToDo)
-      const column = this.getColumn(this.columnNameForManipulations);
-      console.log(column)
-      column.isFrozen = true;
-      //console.log(column.isFrozen)
-      this.treegrid.refreshColumns();
+    } else if(this.actionToDo === 'FilterCol') {
+      this.isFilteringAllowed = !this.isFilteringAllowed;
+    } else if(this.actionToDo === 'MultiSort') {
+      this.treegrid.allowSorting = !this.treegrid.allowSorting;
+      this.treegrid.allowMultiSorting = !this.treegrid.allowMultiSorting;
+      this.treegrid.refresh();
+    } else if(this.actionToDo === 'AddNext') {
+      this.actionsWithRows(arg.rowInfo)
     }
-
+    this.treegrid.refreshColumns();
   }
 
   checkAreInputsPristine(form: FormGroup) {
@@ -219,16 +302,24 @@ export class AppComponent implements OnInit {
       this.ejDialog.show();
     } else if(this.actionToDo === 'DeleteCol') {
       this.ejDialogDelete.show();
+    } else if(this.actionToDo === 'FreezCol') {
+      this.treegrid.frozenColumns = 2;
+      this.treegrid.frozenRows = 2;
+      column.isFrozen = true;
+    } else if(this.actionToDo === 'ChooseCol') {
+      this.visibleColumns = this.treegrid.columns as Column[];
+      this.ejDialogAction.show();
     }
   }
 
   prepareInputsForAddingOrEditing(column: any) {
+    if(this.actionToDo === 'ChooseCol') return;
     const colIndex = column.uid;
     const colHeader = document.querySelector<HTMLElement>(`[e-mappinguid="${colIndex}"]`);
     const allStyles = window.getComputedStyle(colHeader!);
     this.addOrEditForm.patchValue({
       columnName: column.headerText && this.actionToDo === 'EditCol' ? column.headerText : this.headerTextByDefault,
-      columnDataType: column.type ? column.type : 'string',
+      columnDataType: column.editType ? column.editType : 'stringedit',
       columnDefaultValue: column.defaultValue ? column.defaultValue : 'Default value' || 1 || true || null,
       columnMinWidth: column.minWidth ? column.minWidth : '50',
       columnFontSize: column.customAttributes &&  column.customAttributes['style']['font-size'] ? column.customAttributes['style']['font-size'].replace('px', '') : '12',
@@ -242,7 +333,6 @@ export class AppComponent implements OnInit {
   closeDialog(arg?: any) {
     this.addOrEditForm.updateValueAndValidity();
     if (this.isConfirm && this.addOrEditForm.status === 'VALID') {
-      //this.whatNeedToDoAndDoIt(this.columnNameForManipulations);
     } else if(this.isConfirm && this.addOrEditForm.status !== 'VALID') {
       alert('wrong form values, please check data!')
     }
@@ -259,6 +349,17 @@ export class AppComponent implements OnInit {
       oldColumns.splice(idx, 1);
       this.treegrid.refreshColumns();
     }
+  }
+
+  closeChosenDialog(event: any) {
+    const column = this.getColumn(this.columnNameForManipulations);
+    if(this.isColumnVisible) {
+      this.treegrid.refreshColumns();
+    }
+  }
+
+  returnIsColumnVisible(column: Column) {
+     column.visible = !column.visible;
   }
 
   getValueOfInput(name: string) {
@@ -285,47 +386,18 @@ export class AppComponent implements OnInit {
 
   manipulationsWithInputs(fieldValuesPairs: any, column: Column) {
     for(let [input, value] of fieldValuesPairs) {
-      this.switcCaseInput(input, column, value);
-      /* switch(input) {
-        case 'columnName':
-          column.headerText = value;
-          break;
-        case 'columnDataType':
-          column.type = value;
-          break;
-        case 'columnDefaultValue':
-          column.defaultValue = value;
-          break;
-        case 'columnMinWidth':
-          column.minWidth = value;
-          break;
-        case 'columnFontSize':
-          column.customAttributes = {style: {...(column.customAttributes['style']), 'font-size': `${value}px`, }}
-          break;
-        case 'columnFontColor':
-          column.customAttributes = {style: {...(column.customAttributes['style']), 'color': value, }}
-          break;
-        case 'columnBackgroundColor':
-          column.customAttributes = {style: {...(column.customAttributes['style']), 'background-color': value, }}
-          break;
-        case 'columnTextAligh':
-          column.textAlign = value;
-          break;
-        case 'columnTextWrap':
-          column.customAttributes = {style: {...(column.customAttributes['style']), 'white-space': value, }}
-          break;
-      } */
+      this.switchCaseInput(input, column, value);
     }
     this.treegrid.refreshColumns();
   }
 
-  switcCaseInput(input: string, column: Column, value: any) {
+  switchCaseInput(input: string, column: Column, value: any) {
     switch(input) {
       case 'columnName':
         column.headerText = value;
         break;
       case 'columnDataType':
-        column.type = value;
+        column.editType = value;
         break;
       case 'columnDefaultValue':
         column.defaultValue = value;
@@ -349,6 +421,8 @@ export class AppComponent implements OnInit {
         column.customAttributes = {style: {...(column.customAttributes['style']), 'white-space': value, }}
         break;
     }
+    this.treegrid.refreshColumns();
+    column.showColumnMenu = true
   }
 
   addNewColumn(column: Column) {
@@ -363,7 +437,7 @@ export class AppComponent implements OnInit {
       field: 'FIELD' + newFieldIdx,
       headerText: inputs!.has('columnName') ? inputs!.get('columnName') : 'Column...',
       width: 150,
-      type: inputs!.has('columnDataType') ? inputs!.get('columnDataType') : 'string',
+      type: inputs!.has('columnDataType') ? inputs!.get('columnDataType') : 'stringedit',
       defaultValue: inputs!.has('columnDefaultValue') ? inputs!.get('columnDefaultValue') : 'value' || true || 0 || null,
       minWidth: inputs!.has('columnName') ? inputs!.get('columnName') : 150,
       textAlign: inputs!.has('columnTextAligh') ? inputs!.get('columnTextAligh') : 'Center',
@@ -387,8 +461,8 @@ export class AppComponent implements OnInit {
 
   }
 
-  itemRender(event: any) {
-
+  beforeOpen(event: any) {
+    console.log(event)
   }
 
   selectChanges(event: any) {
