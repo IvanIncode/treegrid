@@ -6,6 +6,8 @@
               [contextMenuItems]="contextMenuItems"
               [allowFiltering]='allowFiltering'
               [allowResizing]='true'
+              [frozenRows]='0'
+              [frozenColumns]='0'
               (beforeItemRender)='itemRender($event)'
               (contextMenuOpen)="contextMenuOpen($event)"
               (contextMenuClick)="contextMenuClick($event)"

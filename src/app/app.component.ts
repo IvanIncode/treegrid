@@ -105,7 +105,7 @@ export class AppComponent implements OnInit {
   public editTypeFIELD3: string = 'stringedit';
   public editTypeFIELD4: string = 'stringedit';
   public choosedDataType: string = 'string';
-  public allowFiltering: boolean = false;
+  public allowFiltering: boolean = true;
   public taskIDheaderText: string = 'Column 1';
   public column2headerText: string = 'Column 2';
   public column3headerText: string = 'Column 3';
@@ -120,7 +120,7 @@ export class AppComponent implements OnInit {
 
   constructor(private fb: FormBuilder){
     this.addOrEditForm= this.fb.group({
-      columnName:['', Validators.required],
+      columnName: ['', Validators.required],
       columnDataType: [''],
       columnDefaultValue: [''],
       columnMinWidth: [''],
@@ -155,7 +155,6 @@ export class AppComponent implements OnInit {
 
   contextMenuOpen(arg?: any) {
     let isHeaderClick = false;
-    console.log(this.contextMenuItems.filter(item => item.id === 'FreezCol')[0])
     document.querySelectorAll('div.e-headercelldiv').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     document.querySelectorAll('span.e-headertext').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     if(!isHeaderClick) {
@@ -176,14 +175,16 @@ export class AppComponent implements OnInit {
   contextMenuClick(arg?: any) {
     if(arg) {
       this.actionToDo = arg.item.properties.id;
-      //console.log(this.actionToDo)
     }
     if(this.actionToDo === 'EditCol' || this.actionToDo === 'NewCol' || this.actionToDo === 'DeleteCol') {
       this.onOpenDialog(arg)
     } else {
-      console.log(this.actionToDo, this.columnNameForManipulations)
+      //console.log(this.actionToDo)
       const column = this.getColumn(this.columnNameForManipulations);
-      this.treegrid.openColumnChooser(0,0)
+      console.log(column)
+      column.isFrozen = true;
+      //console.log(column.isFrozen)
+      this.treegrid.refreshColumns();
     }
 
   }
@@ -356,7 +357,7 @@ export class AppComponent implements OnInit {
     for(let i = 0; i < oldColumns.length; i++) {
       if(oldColumns[i] === column) idx = i + 1;
     }
-    const inputs = this.checkAreInputsPristine(this.addOrEditForm); // Map
+    const inputs = this.checkAreInputsPristine(this.addOrEditForm);
     const newFieldIdx = +oldColumns[oldColumns.length - 1].field.replace('FIELD','') + 1;
     const newColumn = <Column> {
       field: 'FIELD' + newFieldIdx,
@@ -393,16 +394,5 @@ export class AppComponent implements OnInit {
   selectChanges(event: any) {
     this.choosedDataType = event.element.outerText;
   }
-
-/*   click(e: any) {
-    let c = <Column[]>
-        [
-          { field: 'ShipCountry', headerText: 'Ship Country', width: 150 }
-        ];
-        for( let i: number = 0; i < c.length; i++ ) {
-    (this.treegrid.columns as Column[]).push( c[ i ] );
-    this.treegrid.refreshColumns();
-    }
-  } */
 
 }
