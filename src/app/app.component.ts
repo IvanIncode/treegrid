@@ -1,18 +1,18 @@
-import { ContextMenuComponent, ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core';
-import { dataSource, virtualData, textWrapData, templateData } from './datasource';
-import { VirtualScrollService, TreeGridComponent, ColumnMenuService, EditSettingsModel, ResizeService, EditService, ContextMenuService, Column, SelectionSettingsModel, ContextMenuItem } from '@syncfusion/ej2-angular-treegrid';
+import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { dataSource, virtualData } from './datasource';
+import { VirtualScrollService, TreeGridComponent, ColumnMenuService, EditSettingsModel, ResizeService, EditService, ContextMenuService, Column, SelectionSettingsModel, FreezeService } from '@syncfusion/ej2-angular-treegrid';
 import { DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { EmitType } from '@syncfusion/ej2-base';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ItemModel, MenuItemModel } from '@syncfusion/ej2-navigations';
+import data from './data';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   encapsulation: ViewEncapsulation.None,
-  providers: [VirtualScrollService, ColumnMenuService, ResizeService, EditService, ContextMenuService]
+  providers: [VirtualScrollService, ColumnMenuService, ResizeService, EditService, ContextMenuService, FreezeService]
 })
 
 export class AppComponent implements OnInit {
@@ -128,10 +128,10 @@ export class AppComponent implements OnInit {
   public editingColumnMinWidth!: boolean;
   public isConfirm!: boolean;
   public addOrEditForm: FormGroup;
-  public editTypeFIELD1: string = 'stringedit';
+  /* public editTypeFIELD1: string = 'stringedit';
   public editTypeFIELD2: string = 'dropdownedit';
   public editTypeFIELD3: string = 'stringedit';
-  public editTypeFIELD4: string = 'stringedit';
+  public editTypeFIELD4: string = 'stringedit'; */
   public choosedDataType: string = 'string';
   public taskIDheaderText: string = 'Column 1';
   public column2headerText: string = 'Column 2';
@@ -145,6 +145,8 @@ export class AppComponent implements OnInit {
   public selectedColumn: Column | null;
   public visibleColumns: Column[] = [];
   public isFilteringAllowed: boolean;
+  public selectedRows: any[] = [];
+  public dataLength: number;
 
   public editOptions: EditSettingsModel = {allowAdding: true, allowEditing: true, allowDeleting: true, mode: 'Row'};
 
@@ -166,7 +168,9 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.initilaizeTarget();
     dataSource();
-    this.data = virtualData;
+    this.data = data;//virtualData;
+    console.log(this.data.length)
+    this.dataLength = this.data.length;
     this.contextMenuItems  = [
       { text: 'Edit Column', id: 'EditCol'},
       { text: 'New Column', id: 'NewCol' },
@@ -180,7 +184,6 @@ export class AppComponent implements OnInit {
       { text: 'Add next', id: 'AddNext'},
       { text: 'Add child', id: 'AddChild' },
       { text: 'Delete row', id: 'DelRow' },
-      { text: 'Edit row', id: 'EditRow' },
     ];
     this.editing = { allowDeleting: true, showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, mode: 'Cell' };
     this.editparams = {params: { format: 'n' }};
@@ -192,12 +195,12 @@ export class AppComponent implements OnInit {
   }
 
   contextMenuOpen(arg?: any) {
-    console.log(arg.rowInfo.target)
     let isHeaderClick = false;
     document.querySelectorAll('div.e-headercelldiv').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     document.querySelectorAll('span.e-headertext').forEach((value, key) => {if(value === arg.rowInfo.target) isHeaderClick = true});
     if(!isHeaderClick) {
       this.treegrid.contextMenuItems = this.contextMenuRowsItems;
+      this.selectedRows = [...this.treegrid.getSelectedRows()];
       //arg.cancel = true;
     } else {
       this.treegrid.contextMenuItems = this.contextMenuItems;
@@ -211,39 +214,29 @@ export class AppComponent implements OnInit {
   }
 
   actionsWithRows(row: any) {
-    console.log(row)
-    let whoIsThis = '';
-    if(row.rowData.Crew && row.rowData.childRecords) {
-      whoIsThis = 'parent';
-      console.log('its parent')
-    } else {
-      whoIsThis = 'children';
-      console.log('its children')
-    }
     switch(this.actionToDo) {
       case 'AddNext':
-        this.addRowLikeNext(row);
+        this.addRow(row, 'Below');
         break;
       case 'AddChild':
-        this.addRowLikeChild(row);
+        this.addRow(row, 'Child');
         break;
       case 'DelRow':
-        console.log('delete row');
-        //this.treegrid.deleteRow();
-        this.treegrid.refresh();
-        break;
-      case 'EditRow':
-        console.log('edit row');
+        this.treegrid.deleteRecord();
         break;
     }
   }
 
-  addRowLikeNext(row: any) {
-
-  }
-
-  addRowLikeChild(row: any) {
-
+  addRow(row: any, where: any) {
+    const newRow = { ...row.rowData }
+    for(let item in newRow) {
+      if(item.includes('FIELD')) newRow[item] = '';
+    }
+    this.dataLength++;
+    newRow.TaskID = this.dataLength;
+    console.log(newRow)
+    this.treegrid.addRecord({ ...newRow }, row.rowIndex, where);
+    this.treegrid.refreshColumns();
   }
 
   getColumn(columnName: string) {
@@ -260,13 +253,18 @@ export class AppComponent implements OnInit {
           || this.actionToDo === 'DeleteCol'
           || this.actionToDo === 'ChooseCol') {
       this.onOpenDialog(arg)
+    } else if(this.actionToDo === 'FreezCol') {
+      console.log('FreezCol')
+      column.isFrozen = true;
     } else if(this.actionToDo === 'FilterCol') {
       this.isFilteringAllowed = !this.isFilteringAllowed;
     } else if(this.actionToDo === 'MultiSort') {
       this.treegrid.allowSorting = !this.treegrid.allowSorting;
       this.treegrid.allowMultiSorting = !this.treegrid.allowMultiSorting;
       this.treegrid.refresh();
-    } else if(this.actionToDo === 'AddNext') {
+    } else if(this.actionToDo === 'AddNext'
+              || this.actionToDo === 'AddChild'
+              || this.actionToDo === 'DelRow') {
       this.actionsWithRows(arg.rowInfo)
     }
     this.treegrid.refreshColumns();
@@ -368,7 +366,6 @@ export class AppComponent implements OnInit {
 
   whatNeedToDoAndDoIt(fieldValuesPairs: any) {
     const whatNeed = this.actionToDo;
-    console.log(whatNeed)
     const column = this.getColumn(this.columnNameForManipulations);
     if(!column.customAttributes) column.customAttributes = {style: {}};
     switch (whatNeed) {
@@ -422,7 +419,6 @@ export class AppComponent implements OnInit {
         break;
     }
     this.treegrid.refreshColumns();
-    column.showColumnMenu = true
   }
 
   addNewColumn(column: Column) {

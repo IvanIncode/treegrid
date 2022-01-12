@@ -1,5 +1,5 @@
 <ejs-treegrid #treegrid [dataSource]='data'
-              [enableVirtualization]=true
+              [enableVirtualization]='true'
               height='100%'
               childMapping='Crew'
               [treeColumnIndex]='1'
@@ -27,24 +27,21 @@
                   width='120'
                   [minWidth]='50'
                   [defaultValue]="true"
-                  showColumnMenu=true
-                  editType='dropdownedit'>
+                  showColumnMenu=true>
         </e-column>
         <e-column field='FIELD2'
                   [headerText]='column3headerText'
                   width='100'
                   [minWidth]='50'
                   [defaultValue]="true"
-                  showColumnMenu=true
-                  [editType]='editTypeFIELD2'>
+                  showColumnMenu=true>
         </e-column>
         <e-column field='FIELD3'
                   [headerText]='column4headerText'
                   width='120'
                   [minWidth]='50'
                   [defaultValue]="true"
-                  showColumnMenu=true
-                  [editType]='editTypeFIELD3'>
+                  showColumnMenu=true>
         </e-column>
         <e-column field='FIELD4'
                   [headerText]='column5headerText'
@@ -52,8 +49,7 @@
                   [minWidth]='50'
                   [defaultValue]="true"
                   textAlign='Right'
-                  showColumnMenu=true
-                  [editType]='editTypeFIELD4'>
+                  showColumnMenu=true>
         </e-column>
     </e-columns>
 </ejs-treegrid>
@@ -113,6 +109,7 @@
                     <label class="e-label-top" for="dataType">data type  </label>
                     <select formControlName="columnDataType" id="columnDataType" name="columnDataType">
                         <option value="stringedit">string</option>
+                        <!-- <option value="TextBox">string</option> -->
                         <option value="numericedit">number</option>
                         <option value="dropdownedit">dropdown</option>
                         <option value="checkboxedit">checkbox</option>
