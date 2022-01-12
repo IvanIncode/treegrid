@@ -233,7 +233,6 @@ export class AppComponent implements OnInit {
     }
     this.dataLength++;
     newRow.TaskID = this.dataLength;
-    console.log(newRow)
     this.treegrid.addRecord({ ...newRow }, row.rowIndex, where);
     this.treegrid.refreshColumns();
   }
