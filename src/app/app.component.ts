@@ -169,7 +169,6 @@ export class AppComponent implements OnInit {
     this.initilaizeTarget();
     dataSource();
     this.data = data;//virtualData;
-    console.log(this.data.length)
     this.dataLength = this.data.length;
     this.contextMenuItems  = [
       { text: 'Edit Column', id: 'EditCol'},
