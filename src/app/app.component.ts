@@ -30,7 +30,6 @@ export class AppComponent implements OnInit {
   @ViewChild('container', { read: ElementRef, static: true }) container!: ElementRef;
   @ViewChild('newColumn') columnTemplate: Column;
   public data!: Object[];
-  //public contextMenuItems!: ContextMenuItem[];
   public contextMenuItems!: MenuItemModel[];
   public contextMenuRowsItems!: MenuItemModel[];
   public editing!: EditSettingsModel;
@@ -177,13 +176,12 @@ export class AppComponent implements OnInit {
       { text: 'Column filtering',  id: 'FilterCol' },
       { text: 'MultiSort',  id: 'MultiSort' }
     ];
-    //this.contextMenuItems = ['AutoFit', 'AutoFitAll', 'SortAscending', 'SortDescending','Edit'  'Edit', 'Save', 'Cancel', 'PdfExport', 'ExcelExport', 'CsvExport'  'FirstPage', 'PrevPage', 'LastPage', 'NextPage'];
     this.contextMenuRowsItems = [
       { text: 'Add next', id: 'AddNext'},
       { text: 'Add child', id: 'AddChild' },
       { text: 'Delete row', id: 'DelRow' },
     ];
-    this.editing = { allowDeleting: true, showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, mode: 'Row' };
+    this.editing = { allowDeleting: true, showDeleteConfirmDialog: false, allowEditing: true, allowAdding: true, mode: 'Row' };
     this.customAttributes = {class : 'customcss'};
   }
 
@@ -219,6 +217,7 @@ export class AppComponent implements OnInit {
         this.addRow(row, 'Child');
         break;
       case 'DelRow':
+        console.log(row)
         this.treegrid.deleteRecord();
         break;
     }
@@ -250,8 +249,8 @@ export class AppComponent implements OnInit {
           || this.actionToDo === 'ChooseCol') {
       this.onOpenDialog(arg)
     } else if(this.actionToDo === 'FreezCol') {
-      console.log('FreezCol')
-      column.isFrozen = true;
+      console.log(arg)
+      //column.isFrozen = true;
     } else if(this.actionToDo === 'FilterCol') {
       this.isFilteringAllowed = !this.isFilteringAllowed;
     } else if(this.actionToDo === 'MultiSort') {
