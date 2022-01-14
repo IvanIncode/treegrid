@@ -6,7 +6,8 @@
               [contextMenuItems]="contextMenuItems"
               [allowFiltering]='isFilteringAllowed'
               [allowResizing]='true'
-              [editSettings]="editOptions"
+              [editSettings]="editing"
+              [showColumnChooser]= 'true'
               (contextMenuOpen)="contextMenuOpen($event)"
               (contextMenuClick)="contextMenuClick($event)"
               [selectionSettings]='selectionOptions'
@@ -27,6 +28,7 @@
                   width='120'
                   [minWidth]='50'
                   [defaultValue]="true"
+                  editType="stringedit"
                   showColumnMenu=true>
         </e-column>
         <e-column field='FIELD2'
@@ -34,6 +36,7 @@
                   width='100'
                   [minWidth]='50'
                   [defaultValue]="true"
+                  editType="stringedit"
                   showColumnMenu=true>
         </e-column>
         <e-column field='FIELD3'
@@ -41,6 +44,7 @@
                   width='120'
                   [minWidth]='50'
                   [defaultValue]="true"
+                  editType="stringedit"
                   showColumnMenu=true>
         </e-column>
         <e-column field='FIELD4'
@@ -48,6 +52,7 @@
                   width='120'
                   [minWidth]='50'
                   [defaultValue]="true"
+                  editType="stringedit"
                   textAlign='Right'
                   showColumnMenu=true>
         </e-column>
@@ -108,8 +113,7 @@
                 <div class="e-float-input e-control-wrapper" id="dataType">
                     <label class="e-label-top" for="dataType">data type  </label>
                     <select formControlName="columnDataType" id="columnDataType" name="columnDataType">
-                        <option value="stringedit">string</option>
-                        <!-- <option value="TextBox">string</option> -->
+                        <option value="stringedit" selected>string</option>
                         <option value="numericedit">number</option>
                         <option value="dropdownedit">dropdown</option>
                         <option value="checkboxedit">checkbox</option>
@@ -165,13 +169,6 @@
                     <span class="e-float-line"></span>
                 </div>
             </div>
-            <!-- <div class="form-group col-md-6" *ngIf="true">
-                <div class="e-float-input e-control-wrapper">
-                    <input formControlName="columnTextWrap" id="columnTextWrap" name="columnTextWrap" type="text">
-                    <span class="e-float-line"></span>
-                    <label class="e-float-text e-label-top" for="columnTextWrap">Text Wrap</label>
-                </div>
-            </div> -->
         </div>
     </ng-template>
 
@@ -186,8 +183,4 @@
                 <label for="column.id">{{ column.headerText }}</label>
             </li>
         </ul>
-    </ng-template>
-
-    <ng-template #newColumn>
-        <h1>qqqqqqqq</h1>
     </ng-template>

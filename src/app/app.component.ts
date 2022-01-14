@@ -1,10 +1,15 @@
 import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { dataSource, virtualData } from './datasource';
-import { VirtualScrollService, TreeGridComponent, ColumnMenuService, EditSettingsModel, ResizeService, EditService, ContextMenuService, Column, SelectionSettingsModel, FreezeService } from '@syncfusion/ej2-angular-treegrid';
+import { VirtualScrollService, TreeGridComponent,
+        ColumnMenuService, EditSettingsModel, ResizeService,
+        EditService, ContextMenuService, Column,
+        SelectionSettingsModel, FreezeService, ContextMenuItem, SortService } from '@syncfusion/ej2-angular-treegrid';
 import { DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { EmitType } from '@syncfusion/ej2-base';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ItemModel, MenuItemModel } from '@syncfusion/ej2-navigations';
+import { ToolbarItems } from '@syncfusion/ej2-angular-treegrid';
+
 import data from './data';
 
 @Component({
@@ -12,7 +17,7 @@ import data from './data';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   encapsulation: ViewEncapsulation.None,
-  providers: [VirtualScrollService, ColumnMenuService, ResizeService, EditService, ContextMenuService, FreezeService]
+  providers: [SortService, VirtualScrollService, ColumnMenuService, ResizeService, EditService, ContextMenuService, FreezeService ]
 })
 
 export class AppComponent implements OnInit {
@@ -25,10 +30,10 @@ export class AppComponent implements OnInit {
   @ViewChild('container', { read: ElementRef, static: true }) container!: ElementRef;
   @ViewChild('newColumn') columnTemplate: Column;
   public data!: Object[];
+  //public contextMenuItems!: ContextMenuItem[];
   public contextMenuItems!: MenuItemModel[];
   public contextMenuRowsItems!: MenuItemModel[];
   public editing!: EditSettingsModel;
-  public editparams!: Object;
   public targetElement!: HTMLElement;
   public isDeleteConfirm: boolean;
   public isColumnVisible: boolean;
@@ -122,16 +127,12 @@ export class AppComponent implements OnInit {
   public actionToDo!: string;
   public columnId!: string;
   public whatNeedToDo!: string;
-  public editingColumnName!: boolean;
-  public editingColumnDataType!: boolean;
-  public editingColumnDefaultValue!: boolean;
-  public editingColumnMinWidth!: boolean;
   public isConfirm!: boolean;
   public addOrEditForm: FormGroup;
-  /* public editTypeFIELD1: string = 'stringedit';
+  public editTypeFIELD1: string = 'stringedit';
   public editTypeFIELD2: string = 'dropdownedit';
   public editTypeFIELD3: string = 'stringedit';
-  public editTypeFIELD4: string = 'stringedit'; */
+  public editTypeFIELD4: string = 'stringedit';
   public choosedDataType: string = 'string';
   public taskIDheaderText: string = 'Column 1';
   public column2headerText: string = 'Column 2';
@@ -148,13 +149,10 @@ export class AppComponent implements OnInit {
   public selectedRows: any[] = [];
   public dataLength: number;
 
-  public editOptions: EditSettingsModel = {allowAdding: true, allowEditing: true, allowDeleting: true, mode: 'Row'};
-
-
   constructor(private fb: FormBuilder){
     this.addOrEditForm= this.fb.group({
       columnName: ['', Validators.required],
-      columnDataType: [''],
+      columnDataType: ['stringedit'],
       columnDefaultValue: [''],
       columnMinWidth: [''],
       columnFontSize: [''],
@@ -179,13 +177,13 @@ export class AppComponent implements OnInit {
       { text: 'Column filtering',  id: 'FilterCol' },
       { text: 'MultiSort',  id: 'MultiSort' }
     ];
+    //this.contextMenuItems = ['AutoFit', 'AutoFitAll', 'SortAscending', 'SortDescending','Edit'  'Edit', 'Save', 'Cancel', 'PdfExport', 'ExcelExport', 'CsvExport'  'FirstPage', 'PrevPage', 'LastPage', 'NextPage'];
     this.contextMenuRowsItems = [
       { text: 'Add next', id: 'AddNext'},
       { text: 'Add child', id: 'AddChild' },
       { text: 'Delete row', id: 'DelRow' },
     ];
-    this.editing = { allowDeleting: true, showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, mode: 'Cell' };
-    this.editparams = {params: { format: 'n' }};
+    this.editing = { allowDeleting: true, showDeleteConfirmDialog: true, allowEditing: true, allowAdding: true, mode: 'Row' };
     this.customAttributes = {class : 'customcss'};
   }
 
@@ -444,9 +442,9 @@ export class AppComponent implements OnInit {
   }
 
   clearAllInputs() {
-    this.editingColumnName = false;
+    /* this.editingColumnName = false;
     this.editingColumnDataType = false;
-    this.editingColumnDefaultValue = false;
+    this.editingColumnDefaultValue = false; */
     this.dialogHeaderText = '';
     this.addOrEditForm.reset();
   }
